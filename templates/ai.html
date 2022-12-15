@@ -10,7 +10,7 @@
 	<!-- <link rel="stylesheet" type="text/css" href="static/opensans-font.css"/> -->
 	<link rel="stylesheet" type="text/css" href="static/line-awesome-font-awesome.min.css"/>
 	<!-- Jquery -->
-	<link rel="stylesheet" href="https://jqueryvalidation.org/files/demo/site-demos.css">
+	<!-- <link rel="stylesheet" href="https://jqueryvalidation.org/files/demo/site-demos.css"> -->
 	<!-- Main Style Css -->
 	<link rel="stylesheet" type="text/css" href="static/style.css"/>
 	
@@ -24,32 +24,31 @@
 				<h4>Your AI virtual assistant</h4>
 				
 				<div class="form-row">
-					
+					<label>Ask anything to Dictionary Version 2.<br/>Do not enter personal information. </label>
+				    <label>Google gives you answers that SEOs and content marketers want you to read, DictionaryV2 creates answers to the questions YOU ask.</label>
 					<label>Bookmark this page and use if you want direct answers instead of clicking links on Google.</label>
-					<label>Ask anything to Dictionary Version 2.<br/> Limited knowledge after 2021. Do not enter personal information. </label>
-				    <label>Don’t ask stupid questions like who are you &#128521; and no need to use 'please', or 'thank you' &#128515;, AI got no feelings.</label><br/>
-					 
 					<textarea maxlength="300" id="user_requirement" rows="10" cols="50" class="input-text"></textarea>
 					
 				</div>
 				
 				<div class="form-row-last">
 				
+					<label style="color: red" id="validation"></label>
 					<input id="submitRequirements" method="POST" type="button" value="Ask" class="register" onclick="gatherDataToSend()">
 					<input id="clearBox" type="button" value="Clear" class="register" onclick="clearAll()">
-					
-					<label style="color: red" id="validation"></label><br/>
-					
-					<!-- <input id="likedIt" method="POST" type="button" value="Liked it" class="register" onclick="dsfasfsd()">
-					<input id="hatedIt" type="button" value="Did not like" class="register" onclick="sdfsadf()"> -->
-					
-
+					<input id="LogInButton" type="button" value="Google Login" class="register" onclick="logIn()">
+				
 				</div>
 				
 				
 			</form>
 			<div class="form-left">
-				<h2>Answer</h2>
+				<h2 id="topfieldofAnswer">Answer</h2>
+				<div id="loader" class="loader">
+					<div class="inner one"></div>
+					<div class="inner two"></div>
+					<div class="inner three"></div>
+				  </div>
 				<p id="outputAnswerToDisplay" class="text-1">Your AI generated answer will appear here.
 					<br/>
 					<br/>
@@ -65,7 +64,7 @@
 				</p>
 				
 				<div class="form-left-last">
-					<input id="LogInButton" type="button" value="Login with Google" class="account" onclick="logIn()">
+					
 					<input id="shareButton" type="button" class="account" value="Share this" onclick="shareURL()">
 					<input id="copyButton" type="button" class="account" value="Copy Output" onclick="copyOutput()">
 				</div>
@@ -73,11 +72,20 @@
 				<label id="loggedinemail"></label><br/>
 				<input id="logoutButton" type="button" class="account" value="LogOut" onclick="logOut()"><br/>
 				<div class="form-row-last">
-				<label></label><a href="/contact" target="_blank">Contact Us</a><br/>
-				<label></label><a href="/terms" target="_blank">Terms & Conditions</a><br/>
-				<label></label><a href="/contact" target="_blank">Advertise here</a>
+				<label></label><a href="/ContactUs" target="_blank">Contact Us</a><br/>
+				<label></label><a href="/TermsOfService" target="_blank">Terms of Service</a><br/>
+				<label></label><a href="/PrivacyPolicy" target="_blank">Privacy Policy</a><br/>
+				<label></label><a href="/UsageGuidelines" target="_blank">Usage Guidelines</a>
+	
 				</div>
-
+				<br/>
+				<label>KEEP IN MIND</label><br/>
+				<label>-Use good judgment when sharing answers, and attribute them to your name. You are responsible for the content you share. Please check anything that DictionaryV2 generates thoroughly!</label><br/>
+				<label>-Training data for our AI cuts off in 2021, so it may not have knowledge of current events.</label><br/>
+				<br/>
+				<label>Powered by OpenAI</label>
+				
+				
 			</div>
 		</div>
 	</div>

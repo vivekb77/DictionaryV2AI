@@ -1,6 +1,18 @@
 
 //login start
-var userId;
+var userId=null;
+var totalTokensUsedByUserToday;
+
+
+//to do on page load start
+analytics.logEvent('Virtul Assistant page visited', { name: ''});
+//disable the copy button till output is written
+
+document.getElementById("copyButton").disabled = true;
+document.getElementById("shareButton").disabled = true;
+document.getElementById('submitRequirements').disabled=false;
+
+
 
 checkLogin();
 function checkLogin() {
@@ -33,6 +45,7 @@ function checkLogin() {
             console.log("user");
             userId = user.uid;
             
+            getTotalTokensUsedToday();  //update the total tokens used at page load
 
             }
             
@@ -54,15 +67,11 @@ firebase.auth().signInWithRedirect(provider);
       if (result.credential) {
         /** @type {firebase.auth.OAuthCredential} */
         analytics.logEvent('Login successful', { name: ''});
-        console.log("login successful");
-
 
       }
-
-     
      
 analytics.logEvent('Login attempted', { name: ''});
-console.log("login attempted");
+
 
     }).catch((error) => {
       // Handle Errors here.
@@ -93,99 +102,118 @@ function logOut(){
 
 // login end
 
-//keep adding user used tokens to db start
-
-function tokensUsedByUser(){
-   
-
-    const database = firebase.database();
- 
-     
-     database.ref('/UserUsedTokens/' +userId).update({ 
-     totaltokensused:firebase.database.ServerValue.increment(totaltokensused)}),
-    
-    database.ref('/UserUsedTokens/' +userId).update({ 
-    querytokensused:firebase.database.ServerValue.increment(querytokensused)}),
-
-    database.ref('/UserUsedTokens/' +userId).update({ 
-    answertokensused:firebase.database.ServerValue.increment(answertokensused)})
-
-    // database.ref('/UserUsedTokens/' +userId).update({ 
-    // lastUpdatedDate:firebase.database.ServerValue.set(firebase.database.ServerValue.TIMESTAMP)})
-
-   
-}
-
-//add user used tokens to db end
-
-
-//to do on page load start
-analytics.logEvent('Virtul Assistant page visited', { name: ''});
-//disable the copy button till output is written
-
-document.getElementById("copyButton").disabled = true;
-document.getElementById("shareButton").disabled = true;
-document.getElementById('submitRequirements').disabled=false;
-
-
-//to do on page load end
-
-var  requirements
-
+var  requirements;
 
  //called on ask button click
 function gatherDataToSend(){
 
-    document.getElementById('copyButton').value="Copy Answer";
-    document.getElementById('shareButton').value="Share this";
-    document.getElementById('copyButton').disabled=true;
-    document.getElementById("shareButton").disabled = true;
-document.getElementById('validation').innerText="";  
- 
-//validate if field is not empty. //this is the input sent to AI
-var  queryByUser = document.getElementById('user_requirement').value.trim();  
+    console.log(totalTokensUsedByUserToday);
+
+     //only logged in users can query
+    if(userId == null){
+        document.getElementById('validation').innerText="Login with Google (takes just ~10 secs) to ask Questions";
+    }
+
+        //only logged in users can query
+    if(userId !== null){
+
+        if(totalTokensUsedByUserToday > 300)
+        {
+            document.getElementById('validation').innerText="You've reached the limit of your daily use. Please try again tomorrow.";
+            rpT7Y6a8WRF();
+        }
+
+        if(totalTokensUsedByUserToday <= 300)
+        {
+
+            //validate if field is not empty. //this is the input sent to AI
+            var  queryByUser = document.getElementById('user_requirement').value.trim();  
+
+            if (queryByUser==null || queryByUser==""){  
+                document.getElementById('validation').innerText = "Enter something";
+            return false;  
+            } if(queryByUser.length>300){  
+                document.getElementById('validation').innerText = "Too long, 300 chars max";
+            return false;  
+            }  
+
+            document.getElementById("loader").removeAttribute("hidden");
+            document.getElementById('copyButton').value="Copy Answer";
+            document.getElementById('shareButton').value="Share this";
+            document.getElementById('copyButton').disabled=true;
+            document.getElementById("shareButton").disabled = true;
+            document.getElementById('validation').innerText="";  
+            var  showProgress = document.getElementById('outputAnswerToDisplay');
+            showProgress.innerText = "Thinking...This may take a few seconds. Please Wait...";
+                
+            
+            // for adding to DB
+            input = queryByUser.trim();
+
+            document.getElementById('submitRequirements').value="Thinking...";  
+            document.getElementById('submitRequirements').disabled = true; 
+            
+            
+            //send requirements to moderate
+            moderateContent(queryByUser);
+
+            //log event
+            askButtonClicked();
+        }
+    }
+}
 
 
-  
-if (queryByUser==null || queryByUser==""){  
-    document.getElementById('validation').innerText = "Enter something";
-  return false;  
-} if(queryByUser.length>300){  
-    document.getElementById('validation').innerText = "Too long, 300 chars max";
-  return false;  
-  }  
-
-    var  showProgress = document.getElementById('outputAnswerToDisplay');
-    showProgress.innerText = "Thinking...This may take a few seconds. Please Wait...";
+function askButtonClicked(){
+   
+    analytics.logEvent('Ask Button clicked', { name: ''});
     
-  
-    // for adding to DB
-    input = queryByUser.trim();
-
-    document.getElementById('submitRequirements').value="Thinking...";  
-document.getElementById('submitRequirements').disabled = true; 
-  
-  
-//send requirements to python and get the AI generated result
-askAI(queryByUser);
-
-//input sanitization
-//sanitizeQuery(queryByUser);
-
-//log event
-askButtonClicked();
-
 }
 
 
-//input sanitization start
-function sanitizeQuery(validatedQueryByUser){
+//moderate user query and warn of content violates policies
+var isQueryContentBad;
+function moderateContent(queryByUser){
 
-//todo
-    //askAI(sanitizedQueryByUser);
-}
+    let querysentToAI = queryByUser.trim();
 
-//input sanitization end
+    const request = new XMLHttpRequest();
+    request.open("POST",'/moderateContent?requirement='+querysentToAI,true);
+    
+    request.onload=() => {
+
+        let isQueryContentBad1 = request.responseText//response wiil be true or false , if true contennt violates policies
+        // convert data into JSON object
+        
+        var parsedData = JSON.parse(isQueryContentBad1);
+        isQueryContentBad = parsedData.results[0].flagged.toString();  
+       
+
+
+        // if value is true don't display output and show warning
+        if (isQueryContentBad == "true"){
+            document.getElementById('validation').innerText="This Query violates our content policies, no answer is displayed.";
+            document.getElementById('outputAnswerToDisplay').innerText="This Query violates our content policies, no answer is displayed.";  
+
+            document.getElementById('topfieldofAnswer').innerText = "Bad request";
+
+            document.getElementById('submitRequirements').value="Ask";  
+            document.getElementById('submitRequirements').disabled=false;
+
+            beYwbUH4XJ2F6bPYUefH();
+
+        }
+
+        if (isQueryContentBad == "false"){
+            askAI(queryByUser);
+
+        }
+      
+    }
+    
+    request.send();
+    
+    }
 
 var responsefromAI;
 
@@ -218,106 +246,50 @@ function displayOutput(responsefromAI){
     document.getElementById('submitRequirements').value="Ask";  
     document.getElementById('submitRequirements').disabled=false;
 
-//display the result on the label
-const  outputLabel = document.getElementById('outputAnswerToDisplay');
-
-// convert data into JSON object
-var parsedData = JSON.parse(responsefromAI);
-
-let cleanData = parsedData.choices[0].text.trim();  
-let totaltokensused1 = parsedData.usage.total_tokens;
-let querytokensused1 = parsedData.usage.prompt_tokens;
-let answertokensused1 = parsedData.usage.completion_tokens;
-
-
-//show more data to sign in users
-if(userId !== null){
-    outputLabel.innerText = cleanData.slice(0, 2000);
-}
-//show less data to sign in users
-if(userId == null){
-outputLabel.innerText = cleanData.slice(0, 500)+"...................................."+"\n\n\nAnswer displayed is limited to 500 characters, Log in with Google (takes ~10 seconds) to view the full answer";
-}
-
-
-
-//enable the copy button
-document.getElementById("copyButton").disabled = false;
-document.getElementById("shareButton").disabled = false;
-
-
-
-  // for adding to DB
-  output = cleanData;
-  totaltokensused = totaltokensused1;
-  querytokensused = querytokensused1;
-  answertokensused = answertokensused1;
-  
-  addDataToDB();
-
-
-}
-
-
-
-function clearAll(){
+    //display the result on the label
     
-    document.getElementById('submitRequirements').value="Ask"; 
-    document.getElementById('submitRequirements').disabled=false;
+    document.getElementById('topfieldofAnswer').innerText = "Answer";
+    // convert data into JSON object
+    var parsedData = JSON.parse(responsefromAI);
 
-    var textAreaplaceholeder = ""
-    var  textAreaplaceholederText1 = document.getElementById('user_requirement');
-    textAreaplaceholederText1.value = textAreaplaceholeder;
+    let cleanData = parsedData.choices[0].text.trim();  
+    let totaltokensused1 = parsedData.usage.total_tokens;
+    let querytokensused1 = parsedData.usage.prompt_tokens;
+    let answertokensused1 = parsedData.usage.completion_tokens;
 
-    document.getElementById('validation').innerText="";  
- 
-    
-    var  placeholderTextLabel = document.getElementById('outputAnswerToDisplay');
-    placeholderTextLabel.innerText = "Your AI generated answer will appear here\n\n Dictionary Version 2 is your virtual assistant that can:\n- Answer general Questions \n- Brainstorm new ideas \n- Draft emails \n- Generate ideas for your business \n- Paste a link and it will summarize\n- Write social posts, tweets, poems, songs\n\nUse this instead of Google search when you want direct answers instead of clicking links on Google."
+    document.getElementById("loader").setAttribute("hidden","");
 
-    document.getElementById('copyButton').value="Copy Answer";
-    document.getElementById('copyButton').disabled=true;
-    document.getElementById('shareButton').value="Share this";
-    document.getElementById('shareButton').disabled=true;
-
-    //update the title and url and title to just domain
-// pushState () -- 3 parameters, 1) state object 2) title and a URL)
-window.history.pushState('', "", '/');
-document.title = "DictionaryV2";
-
-
-    analytics.logEvent('Clear All clicked', { name: ''});
-
-}
-
-function copyOutput(){
-    
-
-     var  outputAnswerToDisplay = document.getElementById('outputAnswerToDisplay');
-     let  textToCopy = outputAnswerToDisplay.innerText;
-     //console.log(textToCopy);
-     navigator.clipboard.writeText(textToCopy);
-
-     document.getElementById('copyButton').value="Answer Copied..";
-   
-     analytics.logEvent('Answer Copied', { name: ''});
-
- }
-
-
-
-   //to add to db
-   var input ;
-   var output;
-   let totaltokensused;
-   let querytokensused;
-   let answertokensused;
-    var firebasePrimaryId;
-
- function addDataToDB(){
+    //display the result on the label
+    const  outputLabel = document.getElementById('outputAnswerToDisplay');
+    outputLabel.innerText = cleanData.slice(0, 2000);  
    
 
+        //enable the copy button
+    document.getElementById("copyButton").disabled = false;
+    document.getElementById("shareButton").disabled = false;
+
+    // for adding to DB
+    output = cleanData;
+    totaltokensused = totaltokensused1;
+    querytokensused = querytokensused1;
+    answertokensused = answertokensused1;
     
+    addDataToDB();
+
+
+}
+
+
+//to add to db
+var input ;
+var output;
+let totaltokensused;
+let querytokensused;
+let answertokensused;
+var firebasePrimaryId;
+
+function addDataToDB(){
+   
     const database = firebase.database();
     const usersRef = database.ref('/VirtulAssistant');
     const autoId = usersRef.push().key
@@ -326,6 +298,7 @@ function copyOutput(){
     
      input: input.trim(),
      output: output.trim(),
+     userId:userId,
      totaltokensused: totaltokensused,
      querytokensused: querytokensused,
      answertokensused:answertokensused,
@@ -341,43 +314,92 @@ function copyOutput(){
     //logged in user -- add tokens used with its own row
     //but if user is not logged in a row for all users with undefined key is updated , this will hold all non logged users total used tokens
     tokensUsedByUser(); 
-    
-    
-
+    addtokensUsedByUserDetailed();
 
 }
+
 
 function updateURLandTitle(){
 
-//update the title and url q string each time new query is done
-// pushState () -- 3 parameters, 1) state object 2) title and a URL)
-window.history.pushState('', "", '?id='+firebasePrimaryId);
-document.title = "DictionaryV2 - "+input;
-
-}
-
-
-function askButtonClicked(){
-   
-    analytics.logEvent('Ask Button clicked', { name: ''});
+    //update the title and url q string each time new query is done
+    // pushState () -- 3 parameters, 1) state object 2) title and a URL)
+    window.history.pushState('', "", '?id='+firebasePrimaryId);
+    document.title = "DictionaryV2 - "+input;
     
+    }
+
+    
+//keep adding user used tokens to db start
+
+function tokensUsedByUser(){
+   
+
+    const database = firebase.database();
+ 
+     
+     database.ref('/UserUsedTokens/' +userId).update({ 
+     totaltokensused:firebase.database.ServerValue.increment(totaltokensused)}),
+    
+    database.ref('/UserUsedTokens/' +userId).update({ 
+    querytokensused:firebase.database.ServerValue.increment(querytokensused)}),
+
+    database.ref('/UserUsedTokens/' +userId).update({ 
+    answertokensused:firebase.database.ServerValue.increment(answertokensused)})
+
+    // database.ref('/UserUsedTokens/' +userId).update({ 
+    // lastUpdatedDate:firebase.database.ServerValue.set(firebase.database.ServerValue.TIMESTAMP)})
+
+   
 }
 
 
-//sharing url with friends with the key of data
-
-function shareURL(){
-
-
-urltoshare = "https://www.dictionaryv2.com/?id="+firebasePrimaryId;
-
-navigator.clipboard.writeText(urltoshare);
-
-document.getElementById('shareButton').value="Link Copied..";
-
-analytics.logEvent('Link shared', { name: ''});
-
+function addtokensUsedByUserDetailed(){
+   
+    const database = firebase.database();
+    const usersRef = database.ref('/tokensUsedByUserDetailed');
+    const autoId = usersRef.push().key
+    
+    usersRef.child(autoId).set({
+    
+     userId:userId,
+     totaltokensused: totaltokensused,
+     createdDate: firebase.database.ServerValue.TIMESTAMP,
+     
+    })
+    getTotalTokensUsedToday(); //update the total tokens used
 }
+
+
+function getTotalTokensUsedToday(){
+
+
+    totalTokensUsedByUserToday = 0;
+    
+    const database = firebase.database();
+       
+    database.ref('/tokensUsedByUserDetailed').orderByChild("userId").equalTo(userId) 
+       .once("value",function(ALLRecords){
+           ALLRecords.forEach(
+               function(CurrentRecord) {
+                  
+       var totalTokensUsedByUserToday1 = CurrentRecord.val().totaltokensused;
+       var createdDate1 = CurrentRecord.val().createdDate;
+       
+        var createdDate = new Date(createdDate1).toLocaleDateString(); 
+        var todaysDate = new Date().toLocaleDateString();   
+    
+       //add all tokens used by user in the same day 
+        if(createdDate === todaysDate){
+             totalTokensUsedByUserToday = totalTokensUsedByUserToday+totalTokensUsedByUserToday1;
+        }
+    
+       });     
+       
+      
+       });
+    
+    
+    }
 
 
 // START 
@@ -408,7 +430,7 @@ function getDataOfSharedQuestion(){
      input = CurrentRecord.val().input;
      output = CurrentRecord.val().output;
 
-
+    document.getElementById("loader").setAttribute("hidden","");
     var  textAreaplaceholederText1 = document.getElementById('user_requirement');
     textAreaplaceholederText1.value = input.trim();
 
@@ -428,8 +450,6 @@ function getDataOfSharedQuestion(){
         document.getElementById('copyButton').value="Copy Answer";
         document.getElementById('copyButton').disabled=false;
 
-        
-
         analytics.logEvent('Shared Question viewed', { name: ''});
 
     }
@@ -442,45 +462,43 @@ if(sharedfirebasePrimaryId == null){
    getDataOfPlaceholderContent();
 }
 
-    function getDataOfPlaceholderContent(){
+function getDataOfPlaceholderContent(){
 
-        var placeholderTextArray = [];
+    var placeholderTextArray = [];
 
-        const database = firebase.database();
-        
-        database.ref('/PlaceholderText').orderByChild("createdDate")  
-        .limitToLast(10)   
-        .once("value",function(ALLRecords){
-            ALLRecords.forEach(
-                function(CurrentRecord) {
-                   
-                    
-
-        var placeholderText = CurrentRecord.val().placeholderText;
-
-        var placeholderTextObj = 
-                {"placeholderText":placeholderText,
-                };
-            
-                placeholderTextArray.push(placeholderTextObj)
-      
-        
+    const database = firebase.database();
     
-          });      
-        
-          //set any random placeholder in textarea  from DB when page is reloaed
-          let randomNum  = Math.floor(Math.random() * placeholderTextArray.length);
-        
-        // because if not here  this loads first and if connection is slow new placeholder takes time to load and this shows up
-        //this is just a backup if placeholer pulling from dbfails 
-          var textAreaplaceholeder = "Eg. Summary of book Guns. Germs and Steel"
-          var  textAreaplaceholederText1 = document.getElementById('user_requirement');
-          textAreaplaceholederText1.innerText = textAreaplaceholeder;
+    database.ref('/PlaceholderText').orderByChild("createdDate")  
+    .limitToLast(10)   
+    .once("value",function(ALLRecords){
+        ALLRecords.forEach(
+            function(CurrentRecord) {
+                
+                
 
-          
-        var  textAreaplaceholederText1 = document.getElementById('user_requirement');
-        textAreaplaceholederText1.value = placeholderTextArray[randomNum].placeholderText;
-  
+    var placeholderText = CurrentRecord.val().placeholderText;
+
+    var placeholderTextObj = 
+            {"placeholderText":placeholderText,
+            };
+        
+            placeholderTextArray.push(placeholderTextObj)
+
+        });      
+    document.getElementById("loader").setAttribute("hidden","");
+        //set any random placeholder in textarea  from DB when page is reloaed
+    let randomNum  = Math.floor(Math.random() * placeholderTextArray.length);
+    
+    // because if not here  this loads first and if connection is slow new placeholder takes time to load and this shows up
+    //this is just a backup if placeholer pulling from dbfails 
+    var textAreaplaceholeder = "Eg. Summary of book Guns. Germs and Steel"
+    var  textAreaplaceholederText1 = document.getElementById('user_requirement');
+    textAreaplaceholederText1.innerText = textAreaplaceholeder;
+
+        
+    var  textAreaplaceholederText1 = document.getElementById('user_requirement');
+    textAreaplaceholederText1.value = placeholderTextArray[randomNum].placeholderText;
+
 
             });
             
@@ -502,3 +520,95 @@ function affiliate2(){
    
     
     }
+
+function shareURL(){
+
+
+    urltoshare = "https://www.dictionaryv2.com/?id="+firebasePrimaryId;
+
+    navigator.clipboard.writeText(urltoshare);
+
+    document.getElementById('shareButton').value="Link Copied..";
+
+    analytics.logEvent('Link shared', { name: ''});
+        
+}   
+
+
+function clearAll(){
+    
+    document.getElementById('submitRequirements').value="Ask"; 
+    document.getElementById('submitRequirements').disabled=false;
+
+    var textAreaplaceholeder = ""
+    var  textAreaplaceholederText1 = document.getElementById('user_requirement');
+    textAreaplaceholederText1.value = textAreaplaceholeder;
+
+    document.getElementById('validation').innerText="";  
+    document.getElementById("loader").setAttribute("hidden","");
+    
+    var  placeholderTextLabel = document.getElementById('outputAnswerToDisplay');
+    placeholderTextLabel.innerText = "Your AI generated answer will appear here\n\n Dictionary Version 2 is your virtual assistant that can:\n- Answer general Questions \n- Brainstorm new ideas \n- Draft emails \n- Generate ideas for your business \n- Paste a link and it will summarize\n- Write social posts, tweets, poems, songs\n\nUse this instead of Google search when you want direct answers instead of clicking links on Google."
+
+    document.getElementById('copyButton').value="Copy Answer";
+    document.getElementById('copyButton').disabled=true;
+    document.getElementById('shareButton').value="Share this";
+    document.getElementById('shareButton').disabled=true;
+    document.getElementById('topfieldofAnswer').innerText = "Answer";
+
+    //update the title and url and title to just domain
+    // pushState () -- 3 parameters, 1) state object 2) title and a URL)
+    window.history.pushState('', "", '/');
+    document.title = "DictionaryV2";
+
+    analytics.logEvent('Clear All clicked', { name: ''});
+
+}
+
+function copyOutput(){
+    
+
+     var  outputAnswerToDisplay = document.getElementById('outputAnswerToDisplay');
+     let  textToCopy = outputAnswerToDisplay.innerText;
+     //console.log(textToCopy);
+     navigator.clipboard.writeText(textToCopy);
+
+     document.getElementById('copyButton').value="Answer Copied..";
+   
+     analytics.logEvent('Answer Copied', { name: ''});
+
+ }
+
+
+
+ function beYwbUH4XJ2F6bPYUefH(){
+   
+    
+    const database = firebase.database();
+    const usersRef = database.ref('/beYwbUH4XJ2F6bPYUefH');
+    const autoId = usersRef.push().key
+    
+    usersRef.child(autoId).set({
+    
+     input: input.trim(),
+     userId:userId,
+     createdDate: firebase.database.ServerValue.TIMESTAMP,
+     
+    })
+  
+
+}
+
+function rpT7Y6a8WRF(){
+    const database = firebase.database();
+    const usersRef = database.ref('/rpT7Y6a8WRF');
+    const autoId = usersRef.push().key
+    
+    usersRef.child(autoId).set({
+    
+     userId:userId,
+     createdDate: firebase.database.ServerValue.TIMESTAMP,
+     
+    }) 
+}
+
