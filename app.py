@@ -41,19 +41,19 @@ def ai():
 def callPythonScriptPA():
     # requirement send from js
     requirement = request.args.get('requirement')
-
+    temperature = float(request.args.get('complexity'))
 
     outputTestCases = openai.Completion.create(
     model="text-davinci-003",
     prompt=requirement,
-    temperature=0,
-    max_tokens=5,
+    temperature=temperature,
+    max_tokens=500,
     top_p=1,
     frequency_penalty=0.0,
     presence_penalty=0.0
     )
 
-
+    # print(temperature)
     return outputTestCases
 
 

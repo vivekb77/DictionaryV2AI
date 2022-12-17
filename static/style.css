@@ -45,9 +45,10 @@ body {
 	margin-bottom: 34px;
 }
 .form-v4-content .form-left {
-	background: #3786bd;
+	background: #ff452a;
 	border-top-right-radius: 10px;
 	border-bottom-right-radius: 10px;
+	align-content: center;
 	padding: 20px 40px;
 	position: relative;
 	width: 100%;
@@ -112,7 +113,7 @@ body {
 	width: 100%;
 }
 .form-v4-content .form-detail h2 {
-	color: #3786bd;
+	color: #ff452a;
 }
 
 .form-v4-content .form-detail .form-group {
@@ -280,7 +281,7 @@ body {
 	text-decoration: underline;
 }
 .form-v4-content .form-detail .register {
-	background: #3786bd;
+	background: #ff452a;
 	border-top-left-radius: 5px;
 	border-bottom-right-radius: 5px;
 	border-top-right-radius: 5px;
@@ -294,7 +295,8 @@ body {
 	font-size: 15px;
 }
 .form-v4-content .form-detail .register:hover {
-	background: #2f73a3;
+	/* background: #2f73a3; old color */
+		background: #ff452a;
 }
 .form-v4-content .form-detail .form-row-last input {
 	padding: 12.5px;
@@ -424,3 +426,52 @@ textarea {
 	  transform: rotateX(35deg) rotateY(55deg) rotateZ(360deg);
 	}
   }
+
+
+  
+/* slide container start*/
+
+
+@import url(https://fonts.googleapis.com/css?family=Dosis:700);
+
+.value {
+  /* border-bottom: 4px dashed #bdc3c7; */
+  text-align: center;
+  font-weight: bold;
+  font-size: 2em;
+  width: 100px; 
+  height: 20px;
+  /* line-height: 60px; */
+  margin: 30px auto;
+  letter-spacing: -.07em;
+  text-shadow: white 2px 2px 2px;
+}
+input[type="range"] {
+  display: block;
+  -webkit-appearance: none;
+  background-color: #f8f8f8;
+  width: 300px;
+  height: 5px;
+  border-radius: 5px;
+  margin: 0 auto;
+  outline: 0;
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  background-color: #ff452a;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 2px solid white;
+  cursor: pointer;
+  transition: .3s ease-in-out;
+}​
+ 
+  input[type="range"]::-webkit-slider-thumb:active {
+    transform: scale(1.6);
+  }
+
+
+
+/* slide container end*/
+

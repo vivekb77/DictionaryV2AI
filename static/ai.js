@@ -1,8 +1,19 @@
+var elem = document.querySelector('input[type="range"]');
+
+		var rangeValue = function(){
+		  var newValue = elem.value;
+		  var target = document.querySelector('.value');
+		  target.innerHTML = newValue;
+		}
+		
+		elem.addEventListener("input", rangeValue);
+
+
 
 //login start
 var userId=null;
 var totalTokensUsedByUserToday;
-
+var complexity;
 
 //to do on page load start
 analytics.logEvent('Virtul Assistant page visited', { name: ''});
@@ -112,18 +123,20 @@ function gatherDataToSend(){
      //only logged in users can query
     if(userId == null){
         document.getElementById('validation').innerText="Login with Google (takes just ~10 secs) to ask Questions";
+        analytics.logEvent('Dict tried asking without login', { name: ''});
     }
 
         //only logged in users can query
     if(userId !== null){
 
-        if(totalTokensUsedByUserToday > 300)
+        if(totalTokensUsedByUserToday > 3000)
         {
             document.getElementById('validation').innerText="You've reached the limit of your daily use. Please try again tomorrow.";
+            analytics.logEvent('Dict user used till limit', { name: ''});
             rpT7Y6a8WRF();
         }
 
-        if(totalTokensUsedByUserToday <= 300)
+        if(totalTokensUsedByUserToday <= 3000)
         {
 
             //validate if field is not empty. //this is the input sent to AI
@@ -153,9 +166,13 @@ function gatherDataToSend(){
             document.getElementById('submitRequirements').value="Thinking...";  
             document.getElementById('submitRequirements').disabled = true; 
             
-            
+            var complexityelement = document.getElementById("complexityrange");
+            var complexity1 = complexityelement.value;
+            complexity= complexity1/10;
+            console.log(complexity);
+
             //send requirements to moderate
-            moderateContent(queryByUser);
+            moderateContent(queryByUser,complexity);
 
             //log event
             askButtonClicked();
@@ -173,7 +190,7 @@ function askButtonClicked(){
 
 //moderate user query and warn of content violates policies
 var isQueryContentBad;
-function moderateContent(queryByUser){
+function moderateContent(queryByUser,complexity){
 
     let querysentToAI = queryByUser.trim();
 
@@ -205,7 +222,8 @@ function moderateContent(queryByUser){
         }
 
         if (isQueryContentBad == "false"){
-            askAI(queryByUser);
+            console.log(isQueryContentBad);
+            askAI(queryByUser,complexity);
 
         }
       
@@ -218,14 +236,14 @@ function moderateContent(queryByUser){
 var responsefromAI;
 
 
-function askAI(queryByUser){
+function askAI(queryByUser,complexity){
 
     let querysentToAI = queryByUser;
     
 //send the info requirement as query string
 
     const request = new XMLHttpRequest();
-    request.open("POST",'/askAI?requirement='+querysentToAI,true);
+    request.open("POST",'/askAI?requirement='+querysentToAI+"&complexity="+complexity,true);
     
     request.onload=() => {
 
@@ -302,6 +320,7 @@ function addDataToDB(){
      totaltokensused: totaltokensused,
      querytokensused: querytokensused,
      answertokensused:answertokensused,
+     complexity:complexity,
      createdDate: firebase.database.ServerValue.TIMESTAMP,
      
     })
@@ -315,6 +334,8 @@ function addDataToDB(){
     //but if user is not logged in a row for all users with undefined key is updated , this will hold all non logged users total used tokens
     tokensUsedByUser(); 
     addtokensUsedByUserDetailed();
+    // location.reload();
+
 
 }
 
