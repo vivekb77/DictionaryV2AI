@@ -21,7 +21,7 @@ body {
 }
 .form-v4-content  {
 	background: #fff;
-	width: 850px;
+	width: 900px;
 	border-radius: 10px;
 	-o-border-radius: 10px;
 	-ms-border-radius: 10px;
@@ -44,8 +44,11 @@ body {
 	padding: 6px 0 0;
 	margin-bottom: 34px;
 }
+
+/* replace all #2f73a3 with and color hex code in the file */
+
 .form-v4-content .form-left {
-	background: #ff452a;
+	background: #2f73a3;
 	border-top-right-radius: 10px;
 	border-bottom-right-radius: 10px;
 	align-content: center;
@@ -113,7 +116,7 @@ body {
 	width: 100%;
 }
 .form-v4-content .form-detail h2 {
-	color: #ff452a;
+	color: #2f73a3;
 }
 
 .form-v4-content .form-detail .form-group {
@@ -281,7 +284,7 @@ body {
 	text-decoration: underline;
 }
 .form-v4-content .form-detail .register {
-	background: #ff452a;
+	background: #2f73a3;
 	border-top-left-radius: 5px;
 	border-bottom-right-radius: 5px;
 	border-top-right-radius: 5px;
@@ -296,7 +299,7 @@ body {
 }
 .form-v4-content .form-detail .register:hover {
 	/* background: #2f73a3; old color */
-		background: #ff452a;
+		background: #2f73a3;
 }
 .form-v4-content .form-detail .form-row-last input {
 	padding: 12.5px;
@@ -338,7 +341,7 @@ body {
 	}
 }
 
-textarea {
+.textarea {
 	width: 100%;
 	height: 150px;
 	padding: 12px 20px;
@@ -352,6 +355,33 @@ textarea {
 	resize: none;
   }
 
+.textarea1 {
+	width: 100%;
+	height: 400px;
+	padding: 12px 20px;
+	box-sizing: border-box;
+	border: 0px solid #f59485;
+	border-radius: 4px;
+	background-color: #2f73a3;
+	font-size: 16px;
+	font-weight: 500;
+	font-family: Verdana, Geneva, Tahoma, sans-serif;
+	resize: none;
+	color: #fff;
+	
+
+  }
+
+.textarea:focus {
+    outline: none !important;
+    border:2px solid rgb(204, 204, 204);
+    /* box-shadow: 0 0 0px rgb(204, 204, 204); */
+  }
+.textarea1:focus {
+    outline: none !important;
+    border:0px solid rgb(204, 204, 204);
+    /* box-shadow: 0 0 0px rgb(204, 204, 204); */
+  } 
 
   html {
 	height: 100%;
@@ -458,7 +488,7 @@ input[type="range"] {
 }
 input[type="range"]::-webkit-slider-thumb {
   -webkit-appearance: none;
-  background-color: #ff452a;
+  background-color: #2f73a3;
   width: 30px;
   height: 30px;
   border-radius: 50%;

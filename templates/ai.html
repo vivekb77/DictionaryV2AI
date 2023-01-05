@@ -2,45 +2,36 @@
 <html>
 <head>
 	<meta charset="utf-8">
-	<title>DictionaryV2</title>
-	<link rel="icon" type="image/x-icon" href="static/favicon.ico">
-	<!-- Mobile Specific Metas -->
+	<title>XYZ</title>
+
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-	<!-- Font-->
-	<!-- <link rel="stylesheet" type="text/css" href="static/opensans-font.css"/> -->
-	<link rel="stylesheet" type="text/css" href="static/line-awesome-font-awesome.min.css"/>
-	<!-- Jquery -->
-	<!-- <link rel="stylesheet" href="https://jqueryvalidation.org/files/demo/site-demos.css"> -->
-	<!-- Main Style Css -->
-	<link rel="stylesheet" type="text/css" href="static/style.css"/>
+	<link rel="stylesheet" type="text/css" href="static/ai.css"/>
 	
-		
 </head>
 <body class="form-v4">
 	<div class="page-content">
 		<div class="form-v4-content">
 			<form class="form-detail" method="POST">
-				<h2>DictionaryV2</h2>
-				<h4>Your AI virtual assistant</h4>
+				<h2>XYZ</h2>
+				<h4>Your AI virtual assistant for XYZ</h4>
 				
 				<div class="form-row">
-					<label>Ask anything to Dictionary Version 2.<br/>Do not enter personal information. </label>
-				    <label>Google gives you answers that SEOs and content marketers want you to read, DictionaryV2 creates answers to the questions YOU ask.</label>
-					<label>Bookmark this page and use when you want direct answers instead of clicking links on Google.</label>
-					<textarea maxlength="300" id="user_requirement" rows="10" cols="50" class="input-text"></textarea>
+					<label>Message1 you want to tell users</label>
+				    <label>Message2 you want to tell users</label>
+					
+					<textarea class="textarea" maxlength="300" id="user_requirement" rows="10" cols="50" class="input-text"></textarea>
 					
 				</div>
 				
 				<div class="form-row-last">
-				
-					<label style="color: red" id="validation"></label>
-					<label>Set Complexity, try different values for Complexity and see which one gives you the best results. Try 9 for more creative outputs, and 0 for well-defined outputs.</label>
-					<div class="value">0</div>
-					<input id="complexityrange" type="range" min="0" max="10" step="1" value="0">	
 					<br/>
+					<label style="color: red" id="validation"></label>
+					<br/>
+					
 					<input id="submitRequirements" method="POST" type="button" value="Ask" class="register" onclick="gatherDataToSend()">
 					<input id="clearBox" type="button" value="Clear" class="register" onclick="clearAll()">
 					<input id="LogInButton" type="button" value="Google Login" class="register" onclick="logIn()">
+					<h5 id="tokensLeft"></h5>
 				
 				</div>
 				
@@ -53,87 +44,24 @@
 					<div class="inner two"></div>
 					<div class="inner three"></div>
 				  </div>
-				<p id="outputAnswerToDisplay" class="text-1">Your AI generated answer will appear here.
-					<br/>
-					<br/>
-					 Dictionary Version 2 is your virtual assistant that can: <br/>
-					- Answer general Questions <br/>
-					- Brainstorm new ideas<br/>
-					- Draft emails<br/>
-					- Generate ideas for your business<br/>
-					- Paste a link and it will summarize<br/>
-					- Write social posts, tweets, poems, songs<br/>
-					<br/>
-					This will provide you with direct answers than clicking links on Google.
-				</p>
+				  <br/>
+				<textarea class="textarea1" maxlength="1000" id="outputAnswerToDisplay" rows="15" cols="50" class="input-text" readonly></textarea>
+				
 				
 				<div class="form-left-last">
-					
 					<input id="shareButton" type="button" class="account" value="Share this" onclick="shareURL()">
 					<input id="copyButton" type="button" class="account" value="Copy Output" onclick="copyOutput()">
-				</div>
-				<!-- <label for="disclamer" style="color:red">Note - Do not enter personal information</label><br/><br/> -->
-				<!-- <label id="loggedinemail"></label><br/>
-				<input id="logoutButton" type="button" class="account" value="LogOut" onclick="logOut()"><br/>
-				<div class="form-row-last">
-				<label></label><a href="/ContactUs" target="_blank">Contact Us</a><br/>
-				<label></label><a href="/TermsOfService" target="_blank">Terms of Service</a><br/>
-				<label></label><a href="/PrivacyPolicy" target="_blank">Privacy Policy</a><br/>
-				<label></label><a href="/UsageGuidelines" target="_blank">Usage Guidelines</a>
-	
-				</div>
-				<br/>
-				<label>KEEP IN MIND</label><br/>
-				<label>-Use good judgment when sharing answers, and attribute them to your name. You are responsible for the content you share. Please check anything that DictionaryV2 generates thoroughly. Do not enter personal information. DictionaryV2 is not liable for content displayed or generated.</label><br/>
-				<label>-Training data for our AI cuts off in 2021, so it may not have knowledge of current events.</label><br/>
-				<br/>
-				<label>Powered by OpenAI</label> -->
-				
-				
-			</div>
-		</div>
-	</div>
-	      
-	<!-- //second row start -->
-<div class="page-content">
-		<div class="form-v4-content">
-			<!-- ad 1 -->
-			<form class="form-detail" method="POST">
-				<!-- <h2>Ads</h2> -->
-				
-				<div class="form-row">
-					<h2>Want more knowledge in less time?</h2>
-					<!-- <h4>Understand books & podcasts in 15 minutes</h4> -->
-					<a href="https://blinkist.o6eiov.net/RykNPg" target="_blank" ><input type="button" value="Get Started" class="register" onclick="affiliate1()"></a>
-					
-				</div>	
-			</form>
-			<!-- ad 2 -->
-			<div class="form-left">
-				<div class="form-left-last">
-				
-					<label id="loggedinemail"></label><br/>
+					<br/>
+					<label id="loggedinemail"></label>
 					<input id="logoutButton" type="button" class="account" value="LogOut" onclick="logOut()"><br/>
-					<div class="form-row-last">
-					<label></label><a href="/ContactUs" target="_blank">Contact Us</a><br/>
-					<label></label><a href="/TermsOfService" target="_blank">Terms of Service</a><br/>
-					<label></label><a href="/PrivacyPolicy" target="_blank">Privacy Policy</a><br/>
-					<label></label><a href="/UsageGuidelines" target="_blank">Usage Guidelines</a>
-		
-					</div>
-					<br/>
-					<label>KEEP IN MIND</label><br/>
-					<label>-Use good judgment when sharing answers, and attribute them to your name. You are responsible for the content you share. Please check anything that DictionaryV2 generates thoroughly. Do not enter personal information. DictionaryV2 is not liable for content displayed or generated.</label><br/>
-					<label>-Training data for our AI cuts off in 2021, so it may not have knowledge of current events.</label><br/>
-					<br/>
-					<label>Copyright &copy; DicionaryV2 2022. Powered by OpenAI</label>
 				</div>
+		
+				
+				
 			</div>
 		</div>
 	</div>
-	<!-- //secon row end -->
-	
-
+	    
 
  <!-- firebase -->
  <script src="https://www.gstatic.com/firebasejs/8.6.7/firebase-app.js"></script>
@@ -142,13 +70,7 @@
  <script src="https://www.gstatic.com/firebasejs/8.6.7/firebase-auth.js"></script>
 
  <script src="static/firebase.js"></script>
-
-	
-	<script src="https://code.jquery.com/jquery-1.11.1.min.js"></script>
-	<script src="https://cdn.jsdelivr.net/jquery.validation/1.16.0/jquery.validate.min.js"></script>
-	<script src="https://cdn.jsdelivr.net/jquery.validation/1.16.0/additional-methods.min.js"></script>
-	<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.5/jquery.min.js"></script>
-	<script src="static/ai.js"></script>
+ <script src="static/ai.js"></script>
 	
 	
 	
